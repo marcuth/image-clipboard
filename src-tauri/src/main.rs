@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tauri_simple_app_template_lib::run()
+    image_clipboard_lib::run()
 }
