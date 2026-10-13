@@ -22,7 +22,9 @@ fn upload_to_catbox(base64_data: String, filename: String) -> Result<String, Str
 
     // Field: reqtype = fileupload
     body.extend_from_slice(format!("--{}\r\n", boundary).as_bytes());
-    body.extend_from_slice(b"Content-Disposition: form-data; name=\"reqtype\"\r\n\r\nfileupload\r\n");
+    body.extend_from_slice(
+        b"Content-Disposition: form-data; name=\"reqtype\"\r\n\r\nfileupload\r\n",
+    );
 
     // Field: fileToUpload
     let safe_filename = if filename.trim().is_empty() {
