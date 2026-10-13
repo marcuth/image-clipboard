@@ -1,8 +1,8 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "tauri-simple-app-template",
+    "productName": "ImageClipboard",
     "version": "0.1.0",
-    "identifier": "dev.marcuth.tauri-simple-app-template",
+    "identifier": "dev.marcuth.image-clipboard",
     "build": {
         "beforeDevCommand": "npm run dev",
         "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
     "app": {
         "windows": [
             {
-                "title": "tauri-simple-app-template",
-                "width": 800,
-                "height": 600
+                "title": "ImageClipboard",
+                "width": 1280,
+                "height": 820,
+                "minWidth": 900,
+                "minHeight": 650
             }
         ],
         "security": {
