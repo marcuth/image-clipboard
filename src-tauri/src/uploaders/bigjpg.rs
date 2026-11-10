@@ -20,7 +20,10 @@ pub struct EnlargeOptions {
 }
 
 pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
-    png(data).or_else(|| jpeg(data)).or_else(|| gif(data)).or_else(|| webp(data))
+    png(data)
+        .or_else(|| jpeg(data))
+        .or_else(|| gif(data))
+        .or_else(|| webp(data))
 }
 
 fn be32(d: &[u8], o: usize) -> u32 {
@@ -100,7 +103,10 @@ fn site_post(path: &str, form: &str) -> Result<Value, String> {
         .post(&format!("{}{}", BASE_URL, path))
         .header("Referer", "https://bigjpg.com/")
         .header("Accept", "application/json, text/plain, */*")
-        .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+        .header(
+            "Content-Type",
+            "application/x-www-form-urlencoded; charset=UTF-8",
+        )
         .send(form.as_bytes());
     read_json(response)
 }
@@ -117,7 +123,11 @@ fn read_json(response: HttpResult) -> Result<Value, String> {
 
 pub fn parse_json(status: u16, text: &str) -> Result<Value, String> {
     let body: Value = serde_json::from_str(text).map_err(|_| {
-        format!("Unexpected response ({}): {}", status, text.chars().take(200).collect::<String>())
+        format!(
+            "Unexpected response ({}): {}",
+            status,
+            text.chars().take(200).collect::<String>()
+        )
     })?;
     if let Some(s) = body.get("status").and_then(Value::as_str) {
         if s != "ok" {
@@ -128,7 +138,11 @@ pub fn parse_json(status: u16, text: &str) -> Result<Value, String> {
 }
 
 fn upload(data: &[u8], filename: &str, filetype: &str) -> Result<String, String> {
-    let form = format!("filename={}&filetype={}", url_encode(filename), url_encode(filetype));
+    let form = format!(
+        "filename={}&filetype={}",
+        url_encode(filename),
+        url_encode(filetype)
+    );
     let sign = site_post("/api/sign_upload", &form)?;
     let (Some(url), Some(file_url)) = (sign["url"].as_str(), sign["fileurl"].as_str()) else {
         return Err("sign_upload response missing url/fileurl".to_string());
@@ -151,7 +165,14 @@ fn upload(data: &[u8], filename: &str, filetype: &str) -> Result<String, String>
     Ok(file_url.to_string())
 }
 
-pub fn task_conf(opts: &EnlargeOptions, filename: &str, size: usize, w: u32, h: u32, input: &str) -> Value {
+pub fn task_conf(
+    opts: &EnlargeOptions,
+    filename: &str,
+    size: usize,
+    w: u32,
+    h: u32,
+    input: &str,
+) -> Value {
     json!({
         "x2": opts.scale.to_string(),
         "style": opts.style,
@@ -167,7 +188,10 @@ pub fn task_conf(opts: &EnlargeOptions, filename: &str, size: usize, w: u32, h: 
 
 fn create_task(conf: &Value) -> Result<String, String> {
     let result = site_post("/task", &format!("conf={}", url_encode(&conf.to_string())))?;
-    result["info"].as_str().map(str::to_string).ok_or_else(|| "Task response missing id".to_string())
+    result["info"]
+        .as_str()
+        .map(str::to_string)
+        .ok_or_else(|| "Task response missing id".to_string())
 }
 
 pub fn task_state(result: &Value, id: &str) -> Result<Option<String>, String> {
@@ -202,7 +226,10 @@ fn wait_for_task(id: &str) -> Result<String, String> {
 }
 
 fn download(url: &str) -> Result<Vec<u8>, String> {
-    let mut response = agent().get(url).call().map_err(|e| format!("Download failed: {}", e))?;
+    let mut response = agent()
+        .get(url)
+        .call()
+        .map_err(|e| format!("Download failed: {}", e))?;
     let status = response.status().as_u16();
     if !(200..300).contains(&status) {
         return Err(format!("Download failed with status {}", status));
@@ -215,7 +242,11 @@ fn download(url: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("Download failed: {}", e))
 }
 
-pub fn enlarge(base64_data: &str, filename: &str, opts: &EnlargeOptions) -> Result<Vec<u8>, String> {
+pub fn enlarge(
+    base64_data: &str,
+    filename: &str,
+    opts: &EnlargeOptions,
+) -> Result<Vec<u8>, String> {
     if !ALLOWED_SCALES.contains(&opts.scale) {
         return Err("Only 2x enlargement is available without a Bigjpg account".to_string());
     }
@@ -228,7 +259,11 @@ pub fn enlarge(base64_data: &str, filename: &str, opts: &EnlargeOptions) -> Resu
 
     let data = decode_base64(base64_data)?;
     let (w, h) = image_size(&data).ok_or("Could not read image size")?;
-    let name = if filename.trim().is_empty() { "image.png" } else { filename.trim() };
+    let name = if filename.trim().is_empty() {
+        "image.png"
+    } else {
+        filename.trim()
+    };
 
     let file_url = upload(&data, name, mime_from_filename(name))?;
     let tid = create_task(&task_conf(opts, name, data.len(), w, h, &file_url))?;
@@ -242,7 +277,9 @@ mod tests {
 
     #[test]
     fn reads_png_size() {
-        let mut d = vec![0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, b'I', b'H', b'D', b'R'];
+        let mut d = vec![
+            0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, b'I', b'H', b'D', b'R',
+        ];
         d.extend_from_slice(&640u32.to_be_bytes());
         d.extend_from_slice(&480u32.to_be_bytes());
         assert_eq!(image_size(&d), Some((640, 480)));
@@ -257,13 +294,17 @@ mod tests {
     #[test]
     fn reads_jpeg_size() {
         let mut d = vec![0xff, 0xd8, 0xff, 0xe0, 0x00, 0x04, 0, 0];
-        d.extend_from_slice(&[0xff, 0xc0, 0x00, 0x0b, 0x08, 0x01, 0xe0, 0x02, 0x80, 0x01, 0x01]);
+        d.extend_from_slice(&[
+            0xff, 0xc0, 0x00, 0x0b, 0x08, 0x01, 0xe0, 0x02, 0x80, 0x01, 0x01,
+        ]);
         assert_eq!(image_size(&d), Some((640, 480)));
     }
 
     #[test]
     fn jpeg_without_sof_is_none() {
-        let d = vec![0xff, 0xd8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+        let d = vec![
+            0xff, 0xd8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ];
         assert_eq!(image_size(&d), None);
     }
 
@@ -304,14 +345,21 @@ mod tests {
     #[test]
     fn parses_site_json() {
         assert!(parse_json(200, r#"{"status":"ok"}"#).is_ok());
-        assert_eq!(parse_json(200, r#"{"status":"fail_limit"}"#).unwrap_err(), "Bigjpg error: fail_limit");
+        assert_eq!(
+            parse_json(200, r#"{"status":"fail_limit"}"#).unwrap_err(),
+            "Bigjpg error: fail_limit"
+        );
         assert!(parse_json(500, "<html>").unwrap_err().contains("500"));
         assert!(parse_json(200, r#"{"info":"1"}"#).is_ok());
     }
 
     #[test]
     fn builds_conf() {
-        let opts = EnlargeOptions { scale: 4, style: "photo".into(), noise: 1 };
+        let opts = EnlargeOptions {
+            scale: 4,
+            style: "photo".into(),
+            noise: 1,
+        };
         let conf = task_conf(&opts, "a.png", 10, 2, 3, "http://x");
         assert_eq!(conf["x2"], "4");
         assert_eq!(conf["noise"], "1");
@@ -333,7 +381,15 @@ mod tests {
     #[test]
     fn validates_options() {
         let bad = |scale, style: &str, noise| {
-            enlarge("aGk=", "a.png", &EnlargeOptions { scale, style: style.into(), noise })
+            enlarge(
+                "aGk=",
+                "a.png",
+                &EnlargeOptions {
+                    scale,
+                    style: style.into(),
+                    noise,
+                },
+            )
         };
         assert!(bad(4, "art", 0).unwrap_err().contains("2x"));
         assert!(bad(2, "x", 0).unwrap_err().contains("Style"));
