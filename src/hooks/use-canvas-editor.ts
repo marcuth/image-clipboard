@@ -385,6 +385,45 @@ export function useCanvasEditor(isEditorOpen = true) {
         }
     }, [])
 
+    // Replace the whole canvas with an image (AI tools), keeping undo history
+    const replaceWithImage = useCallback(
+        (img: HTMLImageElement) => {
+            const canvas = canvasRef.current
+            if (!canvas) return
+
+            const w = img.naturalWidth
+            const h = img.naturalHeight
+            const temp = document.createElement("canvas")
+            temp.width = w
+            temp.height = h
+            const tctx = temp.getContext("2d")
+            if (!tctx) return
+            tctx.drawImage(img, 0, 0)
+            const data = tctx.getImageData(0, 0, w, h)
+
+            if (w === width && h === height) {
+                const ctx = canvas.getContext("2d")
+                if (!ctx) return
+                ctx.clearRect(0, 0, w, h)
+                ctx.putImageData(data, 0, 0)
+                const nextIndex = historyIndexRef.current + 1
+                historyRef.current = historyRef.current.slice(0, nextIndex)
+                historyRef.current.push({
+                    imageData: data,
+                    width: w,
+                    height: h,
+                })
+                historyIndexRef.current = nextIndex
+                updateHistoryFlags()
+            } else {
+                pendingCropDataRef.current = data
+                setWidth(w)
+                setHeight(h)
+            }
+        },
+        [width, height, updateHistoryFlags],
+    )
+
     // Commit Text Annotation
     const commitText = useCallback(() => {
         if (
@@ -897,5 +936,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         handleMouseMove,
         handleMouseUp,
         initCanvas,
+        replaceWithImage,
     }
 }

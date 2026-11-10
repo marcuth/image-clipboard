@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch"
 import { WeightPopover } from "./weight-popover"
 import { ColorPopover } from "./color-popover"
 import { SaveDialog } from "./save-dialog"
+import { AiDialog } from "./ai-dialog"
 
 interface EditorHeaderProps {
     activeTool: ToolType
@@ -37,6 +38,7 @@ interface EditorHeaderProps {
     onUpdateSettings: (newSettings: Partial<ToolSettings>) => void
     onHome: () => void
     onCopyToClipboard: () => void
+    onReplaceImage: (img: HTMLImageElement) => void
     canvasRef: React.RefObject<HTMLCanvasElement | null>
     saveDialogOpen: boolean
     setSaveDialogOpen: (open: boolean) => void
@@ -77,6 +79,7 @@ export function EditorHeader({
     onUpdateSettings,
     onHome,
     onCopyToClipboard,
+    onReplaceImage,
     canvasRef,
     saveDialogOpen,
     setSaveDialogOpen,
@@ -301,6 +304,11 @@ export function EditorHeader({
                             Copy Image to Clipboard (Ctrl+C)
                         </TooltipContent>
                     </Tooltip>
+
+                    <AiDialog
+                        canvasRef={canvasRef}
+                        onReplaceImage={onReplaceImage}
+                    />
 
                     {/* Save Dialog */}
                     <SaveDialog

@@ -16,7 +16,11 @@ import {
     LuShare2,
     LuUpload,
 } from "react-icons/lu"
-import { downloadCanvas, uploadToCatbox } from "@/services/image-service"
+import {
+    downloadCanvas,
+    uploadToCatbox,
+    uploadToImgbb,
+} from "@/services/image-service"
 import { ExportFormat, ExportSettings } from "@/types/canvas"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -24,6 +28,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { toast } from "sonner"
+
+type Host = "catbox" | "imgbb"
+
+const HOST_LABELS: Record<Host, string> = {
+    catbox: "Catbox",
+    imgbb: "ImgBB",
+}
 
 interface SaveDialogProps {
     canvasRef: React.RefObject<HTMLCanvasElement | null>
@@ -37,8 +48,12 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
         quality: 90,
         filename: "screenshot",
     })
-    const [isUploading, setIsUploading] = useState(false)
-    const [catboxUrl, setCatboxUrl] = useState<string | null>(null)
+    const [isUploading, setIsUploading] = useState<Host | null>(null)
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null)
+    const [uploadedHost, setUploadedHost] = useState<Host>("catbox")
+    const [imgbbKey, setImgbbKey] = useState(
+        () => localStorage.getItem("imgbb-api-key") ?? "",
+    )
     const [copied, setCopied] = useState(false)
 
     function handleDownload() {
@@ -52,22 +67,38 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
         }
     }
 
-    async function handleCatboxUpload() {
+    async function handleUpload(host: Host) {
         if (!canvasRef.current) return
-        setIsUploading(true)
+        if (host === "imgbb" && !imgbbKey.trim()) {
+            toast.error("Enter your ImgBB API key first.")
+            return
+        }
+        setIsUploading(host)
         try {
-            const url = await uploadToCatbox(
-                canvasRef.current,
-                settings.filename,
-            )
-            setCatboxUrl(url)
-            toast.success("Uploaded to Catbox successfully!")
+            const url =
+                host === "catbox"
+                    ? await uploadToCatbox(canvasRef.current, settings.filename)
+                    : await uploadToImgbb(
+                          canvasRef.current,
+                          imgbbKey.trim(),
+                          settings.filename,
+                      )
+            if (host === "imgbb") {
+                localStorage.setItem("imgbb-api-key", imgbbKey.trim())
+            }
+            setUploadedUrl(url)
+            setUploadedHost(host)
+            toast.success(`Uploaded to ${HOST_LABELS[host]} successfully!`)
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : "Failed to upload"
-            toast.error(`Catbox error: ${message}`)
+                typeof error === "string"
+                    ? error
+                    : error instanceof Error
+                      ? error.message
+                      : "Failed to upload"
+            toast.error(`${HOST_LABELS[host]} error: ${message}`)
         } finally {
-            setIsUploading(false)
+            setIsUploading(null)
         }
     }
 
@@ -93,8 +124,8 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                         Export & Share Image
                     </DialogTitle>
                     <DialogDescription>
-                        Save the image to your computer or upload anonymously to
-                        Catbox.
+                        Save the image to your computer or upload it to Catbox
+                        or ImgBB.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -176,11 +207,30 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                         </div>
                     )}
 
-                    {catboxUrl && (
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="imgbb-key"
+                            className="text-xs font-semibold"
+                        >
+                            ImgBB API Key
+                        </Label>
+                        <Input
+                            id="imgbb-key"
+                            type="password"
+                            value={imgbbKey}
+                            onChange={(e) => setImgbbKey(e.target.value)}
+                            placeholder="Only needed for ImgBB (api.imgbb.com)"
+                            className="h-8 text-sm"
+                        />
+                    </div>
+
+                    {uploadedUrl && (
                         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2.5">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
                                 <LuCheck className="h-4 w-4" />
-                                <span>Uploaded to Catbox!</span>
+                                <span>
+                                    Uploaded to {HOST_LABELS[uploadedHost]}!
+                                </span>
                             </div>
 
                             <div className="space-y-2">
@@ -191,7 +241,7 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                                     <div className="flex gap-1.5">
                                         <Input
                                             readOnly
-                                            value={catboxUrl}
+                                            value={uploadedUrl}
                                             className="h-7 text-xs font-mono select-all"
                                         />
                                         <Button
@@ -199,7 +249,7 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                                             variant="outline"
                                             className="h-7 px-2"
                                             onClick={() =>
-                                                copyToClipboard(catboxUrl)
+                                                copyToClipboard(uploadedUrl)
                                             }
                                         >
                                             {copied ? (
@@ -215,7 +265,7 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                                             className="h-7 px-2"
                                         >
                                             <a
-                                                href={catboxUrl}
+                                                href={uploadedUrl}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
@@ -230,20 +280,23 @@ export function SaveDialog({ canvasRef, open, onOpenChange }: SaveDialogProps) {
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-row gap-2 pt-2">
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={handleCatboxUpload}
-                        disabled={isUploading}
-                        className="w-full sm:w-auto gap-1.5 h-9"
-                    >
-                        {isUploading ? (
-                            <LuLoader className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <LuUpload className="h-4 w-4" />
-                        )}
-                        <span>Upload to Catbox</span>
-                    </Button>
+                    {(["catbox", "imgbb"] as Host[]).map((host) => (
+                        <Button
+                            key={host}
+                            type="button"
+                            variant="secondary"
+                            onClick={() => handleUpload(host)}
+                            disabled={isUploading !== null}
+                            className="w-full sm:w-auto gap-1.5 h-9"
+                        >
+                            {isUploading === host ? (
+                                <LuLoader className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <LuUpload className="h-4 w-4" />
+                            )}
+                            <span>{HOST_LABELS[host]}</span>
+                        </Button>
+                    ))}
 
                     <Button
                         type="button"

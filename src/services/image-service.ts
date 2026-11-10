@@ -94,53 +94,29 @@ export function downloadCanvas(
     document.body.removeChild(a)
 }
 
+function ensurePngName(filename: string): string {
+    const name = filename.trim() || "screenshot"
+    return name.toLowerCase().endsWith(".png") ? name : `${name}.png`
+}
+
 export async function uploadToCatbox(
     canvas: HTMLCanvasElement,
     filename: string = "screenshot.png",
 ): Promise<string> {
-    const dataUrl = canvas.toDataURL("image/png")
-    let safeName = filename.trim()
-    if (!safeName.toLowerCase().endsWith(".png")) {
-        safeName = `${safeName}.png`
-    }
-
-    // 1. Try Tauri native backend command (no CORS restrictions)
-    try {
-        const url = await invoke<string>("upload_to_catbox", {
-            base64Data: dataUrl,
-            filename: safeName,
-        })
-        if (url && url.startsWith("http")) {
-            return url
-        }
-    } catch {
-        // Fallback to browser fetch if running in pure web mode
-    }
-
-    // 2. Browser fallback via standard FormData
-    const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((b) => resolve(b), "image/png")
+    return invoke<string>("upload_to_catbox", {
+        base64Data: canvas.toDataURL("image/png"),
+        filename: ensurePngName(filename),
     })
+}
 
-    if (!blob) throw new Error("Failed to export image data")
-
-    const formData = new FormData()
-    formData.append("reqtype", "fileupload")
-    formData.append("fileToUpload", blob, safeName)
-
-    const response = await fetch("https://catbox.moe/user/api.php", {
-        method: "POST",
-        body: formData,
+export async function uploadToImgbb(
+    canvas: HTMLCanvasElement,
+    apiKey: string,
+    filename: string = "screenshot.png",
+): Promise<string> {
+    return invoke<string>("upload_to_imgbb", {
+        base64Data: canvas.toDataURL("image/png"),
+        filename: ensurePngName(filename),
+        apiKey,
     })
-
-    if (!response.ok) {
-        throw new Error(`Catbox upload failed with status ${response.status}`)
-    }
-
-    const resultUrl = (await response.text()).trim()
-    if (!resultUrl.startsWith("http")) {
-        throw new Error(resultUrl || "Catbox upload failed")
-    }
-
-    return resultUrl
 }

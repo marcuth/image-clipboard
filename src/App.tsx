@@ -62,6 +62,7 @@ export function App() {
         handleMouseMove,
         handleMouseUp,
         initCanvas,
+        replaceWithImage,
     } = useCanvasEditor(editorOpen)
 
     // Global Paste Listener (works on both Welcome and Editor)
@@ -156,6 +157,7 @@ export function App() {
                         onUpdateSettings={setSettings}
                         onHome={handleReturnHome}
                         onCopyToClipboard={handleCopyToClipboard}
+                        onReplaceImage={replaceWithImage}
                         canvasRef={canvasRef}
                         saveDialogOpen={saveDialogOpen}
                         setSaveDialogOpen={setSaveDialogOpen}
