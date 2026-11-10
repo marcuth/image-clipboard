@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/marcuth/image-clipboard/releases/latest"><img src="https://img.shields.io/github/v/release/marcuth/ImageClipboard?color=6366f1&label=release" alt="Latest Release" /></a>
-  <a href="https://github.com/marcuth/image-clipboard/releases"><img src="https://img.shields.io/github/downloads/marcuth/ImageClipboard/total?color=10b981" alt="Downloads" /></a>
+  <a href="https://github.com/marcuth/image-clipboard/releases/latest"><img src="https://img.shields.io/github/v/release/marcuth/Image-Clipboard?color=6366f1&label=release" alt="Latest Release" /></a>
+  <a href="https://github.com/marcuth/image-clipboard/releases"><img src="https://img.shields.io/github/downloads/marcuth/Image-Clipboard/total?color=10b981" alt="Downloads" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License MIT" /></a>
   <a href="https://tauri.app/"><img src="https://img.shields.io/badge/Tauri-v2-24C8D8?logo=tauri&logoColor=white" alt="Tauri v2" /></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" /></a>

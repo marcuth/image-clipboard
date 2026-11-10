@@ -37,6 +37,11 @@ interface HistoryItem {
     height: number
 }
 
+interface PointerPosition {
+    clientX: number
+    clientY: number
+}
+
 export function useCanvasEditor(isEditorOpen = true) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const previewCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -466,7 +471,7 @@ export function useCanvasEditor(isEditorOpen = true) {
     }, [])
 
     const getCanvasCoordinates = useCallback(
-        (e: React.MouseEvent<HTMLCanvasElement>): Point => {
+        (e: PointerPosition): Point => {
             const canvas = canvasRef.current
             if (!canvas) return { x: 0, y: 0 }
             const rect = canvas.getBoundingClientRect()
@@ -655,7 +660,7 @@ export function useCanvasEditor(isEditorOpen = true) {
     )
 
     const handleMouseDown = useCallback(
-        (e: React.MouseEvent<HTMLCanvasElement>) => {
+        (e: React.MouseEvent<HTMLElement>) => {
             if (e.button === 1 || activeTool === "select") {
                 setIsPanning(true)
                 lastPanPointRef.current = { x: e.clientX, y: e.clientY }
@@ -706,7 +711,7 @@ export function useCanvasEditor(isEditorOpen = true) {
     )
 
     const handleMouseMove = useCallback(
-        (e: React.MouseEvent<HTMLCanvasElement>) => {
+        (e: React.MouseEvent<HTMLElement>) => {
             const pt = getCanvasCoordinates(e)
             setCursorPos(pt)
 
@@ -730,7 +735,7 @@ export function useCanvasEditor(isEditorOpen = true) {
     )
 
     const handleMouseUp = useCallback(
-        (e: React.MouseEvent<HTMLCanvasElement>) => {
+        (e: PointerPosition) => {
             if (isPanning) {
                 setIsPanning(false)
                 lastPanPointRef.current = null
@@ -750,6 +755,12 @@ export function useCanvasEditor(isEditorOpen = true) {
         },
         [isPanning, isDrawing, getCanvasCoordinates, activeTool, commitDrawing],
     )
+
+    useEffect(() => {
+        if (!isDrawing && !isPanning) return
+        window.addEventListener("mouseup", handleMouseUp)
+        return () => window.removeEventListener("mouseup", handleMouseUp)
+    }, [isDrawing, isPanning, handleMouseUp])
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -900,7 +911,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         commitText,
         handleMouseDown,
         handleMouseMove,
-        handleMouseUp,
         initCanvas,
         replaceWithImage,
     }

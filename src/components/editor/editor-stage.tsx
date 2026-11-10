@@ -27,9 +27,8 @@ interface EditorStageProps {
     onCommitText: () => void
     onCancelText: () => void
     settings: ToolSettings
-    onMouseDown: (e: React.MouseEvent<HTMLCanvasElement>) => void
-    onMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void
-    onMouseUp: (e: React.MouseEvent<HTMLCanvasElement>) => void
+    onMouseDown: (e: React.MouseEvent<HTMLElement>) => void
+    onMouseMove: (e: React.MouseEvent<HTMLElement>) => void
     onWheel: (e: React.WheelEvent<HTMLDivElement>) => void
 }
 
@@ -52,7 +51,6 @@ export function EditorStage({
     settings,
     onMouseDown,
     onMouseMove,
-    onMouseUp,
     onWheel,
 }: EditorStageProps) {
     function getCursorClass(): string {
@@ -77,10 +75,23 @@ export function EditorStage({
         }
     }
 
+    function onlyOnSurface(
+        handler: (e: React.MouseEvent<HTMLElement>) => void,
+    ): (e: React.MouseEvent<HTMLElement>) => void {
+        return (e) => {
+            const isSurface =
+                e.target === e.currentTarget ||
+                e.target === previewCanvasRef.current
+            if (isSurface) handler(e)
+        }
+    }
+
     return (
         <div
             ref={containerRef}
             onWheel={onWheel}
+            onMouseDown={onlyOnSurface(onMouseDown)}
+            onMouseMove={onlyOnSurface(onMouseMove)}
             className="relative flex-1 w-full h-full overflow-hidden bg-neutral-900/95 flex items-center justify-center select-none"
             style={{
                 backgroundImage:
@@ -115,9 +126,6 @@ export function EditorStage({
                     ref={previewCanvasRef}
                     width={width}
                     height={height}
-                    onMouseDown={onMouseDown}
-                    onMouseMove={onMouseMove}
-                    onMouseUp={onMouseUp}
                     onContextMenu={(e) => e.preventDefault()}
                     className={`absolute inset-0 block rounded-sm ${getCursorClass()}`}
                 />

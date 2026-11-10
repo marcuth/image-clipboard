@@ -58,7 +58,6 @@ export function App() {
         commitText,
         handleMouseDown,
         handleMouseMove,
-        handleMouseUp,
         initCanvas,
         replaceWithImage,
     } = useCanvasEditor(editorOpen)
@@ -186,7 +185,6 @@ export function App() {
                         settings={settings}
                         onMouseDown={handleMouseDown}
                         onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseUp}
                         onWheel={handleWheel}
                     />
 
