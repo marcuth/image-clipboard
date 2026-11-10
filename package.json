@@ -1,7 +1,7 @@
 {
     "name": "@marcuth/image-clipboard",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "ImageClipboard - Fast and modern screenshot and image annotation desktop app",
     "type": "module",
     "license": "MIT",
