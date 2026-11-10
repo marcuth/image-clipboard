@@ -27,18 +27,16 @@
 
 ---
 
-## ⚡ Highlights
+## ⚡ What It Does
 
-ImageClipboard combines the speed and simplicity of web-based screenshot tools with the power and safety of a native desktop application. Everything happens locally on your machine—no data is sent anywhere unless you explicitly choose to upload.
+ImageClipboard turns a screenshot into a finished, shareable image in seconds. Paste it, crop it, mark it up, hide what is private, then copy it, save it or upload it. Everything is processed on your computer; nothing leaves it unless you press an upload or enlarge button.
 
-- **Instant Start:** Paste image data from your clipboard (`Ctrl+V`), drag-and-drop any image file, or create a blank canvas.
-- **Default Crop-First Workflow:** Opens directly with the **Crop Area** tool ready to crop unwanted borders and focus on what matters.
-- **Drawing & Annotation Suite:** Smooth brush with Bézier line smoothing, straight lines with 45° angle snapping, rectangles, ellipses, arrows, text, and eyedropper color sampling.
-- **Spotlight Focus (`F`):** Highlight important details with crisp spotlight apertures while blurring and dimming the background.
-- **Censor & Blur (`X`):** Easily obfuscate passwords, API tokens, emails, and sensitive user data with rounded pixel blur.
-- **Native Clipboard Copy (`Ctrl+C`):** Copy the annotated bitmap directly to the OS clipboard in PNG format.
-- **Catbox Cloud Integration:** Direct anonymous image hosting via [Catbox](https://catbox.moe/) through native desktop HTTP requests with instant share links.
-- **Modern Design:** Polished dark & light mode with shadcn/ui components, custom toolbars, zoom/pan controls, and smooth animations.
+- Start from a pasted screenshot, a dropped file or a blank canvas.
+- Annotate with a brush, lines, shapes, arrows and text.
+- Hide sensitive data with blur, or spotlight what matters.
+- Remove the background of any image, locally.
+- Enlarge an image 2x with AI.
+- Copy, download, or upload to Catbox or ImgBB.
 
 ---
 
@@ -56,85 +54,105 @@ Pre-built binaries for Windows, macOS, and Linux are available on the GitHub Rel
 
 ---
 
-## 🎨 Features & Capabilities
+## 🖼 Tour
 
-### 1. Welcome & Onboarding
+### Welcome screen
 
-- **Start From Scratch:** Blank canvas with custom dimensions or popular presets (1920×1080 FHD, 1280×720 HD, 1024×768, 1024×1024 1:1, 2048×2048) and background colors (including transparency).
-- **Paste Image Data:** Global `Ctrl+V` listener captures screenshots and clipboard images from anywhere.
-- **Drop Image Files:** Drag & drop support for PNG, JPG, WEBP, GIF, SVG, and BMP files or browse via the file dialog.
+![Welcome screen](docs/screenshots/welcome.png)
 
-### 2. Annotation & Drawing Tools
+The app opens maximized on the welcome screen with three ways to begin:
 
-| Key | Tool                      | Description                                                                                     |
-| :-: | :------------------------ | :---------------------------------------------------------------------------------------------- |
-| `C` | **Crop Area** _(Default)_ | Interactive crop box with darkened exterior mask, size readout, and `Enter`/`Esc` confirmation. |
-| `L` | **Line**                  | Crisp straight lines. Hold `Shift` to snap angle in 45° increments.                             |
-| `B` | **Smooth Brush**          | Freehand drawing with optional Bézier curve path smoothing.                                     |
-| `R` | **Rectangle**             | Stroke and fill with optional rounded corners. Hold `Shift` for 1:1 square.                     |
-| `E` | **Ellipse**               | Ellipses and circles. Hold `Shift` for 1:1 circle, `Ctrl` to draw from center.                  |
-| `F` | **Focus Spotlight**       | Highlights a specific rectangle while blurring and dimming the background.                      |
-| `X` | **Blur & Censor**         | Pixelated blur to obscure sensitive text and personal information.                              |
-| `A` | **Arrow**                 | Directed arrow pointers with crisp triangular arrowheads.                                       |
-| `T` | **Text**                  | In-place typography annotation with solid dark backdrop pill.                                   |
-| `I` | **Eyedropper**            | Sample any pixel color directly from the canvas.                                                |
-| `V` | **Select & Pan**          | Pan around the canvas or drag with mouse middle-click / mouse wheel.                            |
+- **Start From Scratch:** pick a size (presets like 1920×1080, 1280×720 or 1024×1024, or your own) and a background color, including transparent.
+- **Paste An Image:** press `Ctrl+V` anywhere to load an image from the clipboard.
+- **Drop An Image:** drag a PNG, JPG, WEBP, GIF or BMP file in, or click to browse.
 
-### 3. Contextual Properties & Controls
+The moon/sun button switches between dark and light themes.
 
-- **Color Popover:** Quick-palette colors, transparent fill support, and custom HEX code input.
-- **Stroke Weight Slider:** Real-time thickness slider from 1px to 48px with visual line preview.
-- **Undo / Redo History:** Unlimited state history stack (`Ctrl+Z` / `Ctrl+Y`).
-- **Zoom Controls:** Zoom Fit, 100% Actual Size, zoom slider (10% to 500%), and zoom in/out shortcuts.
+### Editor
 
-### 4. Export & Sharing
+![Editor with the crop tool ready](docs/screenshots/editor-crop.png)
 
-- **Copy to Clipboard (`Ctrl+C`):** Generates a PNG blob directly into the OS clipboard.
-- **Local File Download:** Export as PNG, JPG (with quality slider 10%–100%), or WEBP.
-- **Catbox Upload:** Direct upload to [Catbox.moe](https://catbox.moe/) powered by native Rust backend requests with no CORS issues, providing immediate shareable links.
+Opening an image lands you in the editor with the **Crop** tool active. The top bar holds the tools in the middle and the actions on the right (Copy, AI, Save & Share, theme). The bottom bar has undo/redo, the cursor position, the canvas size and the zoom controls.
+
+### Annotating
+
+![Annotated screenshot](docs/screenshots/editor-annotated.png)
+
+Pick a tool, and its options (color, stroke weight, rounded corners and so on) appear in the top bar. This example uses **Blur** on a secret token, a **Rectangle** around a card and an **Arrow** pointing at a value.
+
+![Focus tool options](docs/screenshots/editor-tool-options.png)
+
+Each tool shows only the options that apply to it. **Focus** can blur and dim everything outside the highlighted area.
+
+### AI tools
+
+![AI tools dialog](docs/screenshots/ai-tools.png)
+
+Open them with the **AI** button. The result replaces the canvas and can be undone with `Ctrl+Z`.
+
+- **Remove background:** runs entirely on your device. The first use downloads the model once and then works from cache.
+- **Enlarge with Bigjpg:** doubles the image size (2x, the only scale Bigjpg offers without an account). Choose **Art / Illustration** or **Photo**, and a noise-reduction level. The image is sent to bigjpg.com, and processing can take a few minutes.
+
+### Save & Share
+
+![Save and share dialog](docs/screenshots/save-share.png)
+
+Open it with **Save & Share** or `Ctrl+S`.
+
+- Set the **filename** and **format**: PNG, JPG or WEBP (with a quality slider for JPG and WEBP).
+- **Download Image** saves the file.
+- **Catbox** uploads anonymously and gives you a link to copy.
+- **ImgBB** uploads with your own API key. Get a free key at [api.imgbb.com](https://api.imgbb.com/), paste it in the field, and it is remembered on this computer.
+
+---
+
+## 🎨 Tools
+
+| Key | Tool              | What it does                                                             |
+| :-: | :---------------- | :----------------------------------------------------------------------- |
+| `V` | **Select & Pan**  | Move around the canvas.                                                  |
+| `C` | **Crop**          | Drag a box, then `Enter` to apply or `Esc` to cancel.                    |
+| `L` | **Line**          | Straight line. Hold `Shift` to snap to 45° steps.                        |
+| `B` | **Brush**         | Freehand drawing with optional smoothing.                                |
+| `R` | **Rectangle**     | Stroke and fill, optional rounded corners. `Shift` makes a square.       |
+| `E` | **Ellipse**       | Ellipse or circle. `Shift` makes a circle, `Ctrl` draws from the center. |
+| `F` | **Focus**         | Spotlight an area and dim or blur the rest.                              |
+| `X` | **Blur & Censor** | Pixelate passwords, tokens and personal data.                            |
+| `A` | **Arrow**         | Arrow pointing at a target.                                              |
+| `T` | **Text**          | Click to type a label, `Enter` to place it.                              |
+| `I` | **Eyedropper**    | Pick a color from the image.                                             |
+
+Color and stroke weight (1–48 px) are set from the top bar. Zoom with `Ctrl` + mouse wheel (10%–500%), pan with the wheel, or use the **Fit** and **100%** buttons.
 
 ---
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut                        | Action                                               |
-| :------------------------------ | :--------------------------------------------------- |
-| `Ctrl + V`                      | Paste image from clipboard                           |
-| `Ctrl + C`                      | Copy current canvas to clipboard                     |
-| `Ctrl + S`                      | Open Export & Save dialog                            |
-| `Ctrl + Z`                      | Undo last operation                                  |
-| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo last operation                                  |
-| `C`                             | Select Crop tool                                     |
-| `L`                             | Select Line tool                                     |
-| `B`                             | Select Brush tool                                    |
-| `R`                             | Select Rectangle tool                                |
-| `E`                             | Select Ellipse tool                                  |
-| `F`                             | Select Focus Spotlight tool                          |
-| `X`                             | Select Blur & Censor tool                            |
-| `A`                             | Select Arrow tool                                    |
-| `T`                             | Select Text tool                                     |
-| `I`                             | Select Eyedropper tool                               |
-| `V`                             | Select / Pan tool                                    |
-| `Enter`                         | Commit active crop or text                           |
-| `Escape`                        | Cancel active crop or text                           |
-| `Shift` (Hold)                  | Snap angle (Line) / Force 1:1 ratio (Rect & Ellipse) |
+| Shortcut                                    | Action                            |
+| :------------------------------------------ | :-------------------------------- |
+| `Ctrl + V`                                  | Paste image from clipboard        |
+| `Ctrl + C`                                  | Copy the canvas to the clipboard  |
+| `Ctrl + S`                                  | Open Save & Share                 |
+| `Ctrl + Z`                                  | Undo                              |
+| `Ctrl + Y` / `Ctrl + Shift + Z`             | Redo                              |
+| `V` `C` `L` `B` `R` `E` `F` `X` `A` `T` `I` | Switch tool (see the table above) |
+| `Enter`                                     | Apply crop or place text          |
+| `Esc`                                       | Cancel crop or text               |
+| `Shift` (hold)                              | Snap angles, or force 1:1 shapes  |
+| `Ctrl` + wheel                              | Zoom                              |
 
 ---
 
-## 🛠 Tech Stack
+## ❓ Good To Know
 
-- **Framework:** [Tauri v2](https://tauri.app/)
-- **Frontend:** [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Bundler:** [Vite 7](https://vite.dev/)
-- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
-- **Icons:** [react-icons/lu](https://react-icons.github.io/react-icons/icons/lu/) (Lucide)
-- **Validation:** [Zod v4](https://zod.dev/)
-- **Backend:** Rust (Tauri core + ureq + base64)
+- **Privacy:** images stay on your computer unless you use Catbox, ImgBB or Bigjpg. Catbox and ImgBB links are public.
+- **Undo covers AI results:** background removal and enlargement can be reverted.
+- **Transparent images:** shown over a checkerboard, and PNG keeps the transparency on export.
+- **Upload fails?** Check your connection and, for ImgBB, that the API key is valid. The error message from the service is shown in the notification.
 
 ---
 
-## 🚀 Development & Build
+## 🚀 Building From Source
 
 ### Prerequisites
 
@@ -167,6 +185,8 @@ npm run build
 # Package the native desktop binary
 npm run tauri build
 ```
+
+Contributors: see [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for code guidelines and architecture.
 
 The compiled desktop installer and executable will be available inside `src-tauri/target/release/bundle/`.
 
