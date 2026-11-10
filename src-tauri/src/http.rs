@@ -4,8 +4,6 @@ use base64::Engine;
 
 pub const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
-/// Builds an agent that does not turn HTTP error statuses into errors,
-/// so the server's own message can be reported to the user.
 pub fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
         .http_status_as_error(false)
@@ -15,7 +13,6 @@ pub fn agent() -> ureq::Agent {
         .into()
 }
 
-/// Decodes a base64 string, accepting an optional `data:...;base64,` prefix.
 pub fn decode_base64(data: &str) -> Result<Vec<u8>, String> {
     let clean = match data.find(',') {
         Some(idx) => &data[idx + 1..],
@@ -26,7 +23,6 @@ pub fn decode_base64(data: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("Invalid base64 data: {}", e))
 }
 
-/// Percent-encodes a value for `application/x-www-form-urlencoded` bodies.
 pub fn url_encode(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for byte in value.bytes() {
@@ -40,7 +36,6 @@ pub fn url_encode(value: &str) -> String {
     out
 }
 
-/// Builds a `multipart/form-data` body. Returns `(content_type, body)`.
 pub fn multipart(
     fields: &[(&str, &str)],
     file_field: &str,

@@ -78,7 +78,6 @@ export function EditorFooter({
     return (
         <TooltipProvider delayDuration={200}>
             <footer className="h-10 border-t border-border bg-card/80 backdrop-blur-md px-3 flex items-center justify-between text-xs shrink-0 select-none z-20">
-                {/* Left: Undo, Redo, Hint */}
                 <div className="flex items-center gap-1.5">
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -119,9 +118,7 @@ export function EditorFooter({
                     </span>
                 </div>
 
-                {/* Right: Coordinates, Canvas Size, Zoom Controls */}
                 <div className="flex items-center gap-3">
-                    {/* Cursor coordinates */}
                     {cursorPos && (
                         <div className="font-mono text-[11px] text-muted-foreground hidden lg:flex items-center gap-2">
                             <span>
@@ -131,7 +128,6 @@ export function EditorFooter({
                         </div>
                     )}
 
-                    {/* Canvas Size Badge */}
                     <div className="font-mono text-[11px] font-medium bg-muted/60 px-2 py-0.5 rounded border border-border/50 text-foreground flex items-center gap-1">
                         <LuScan className="h-3 w-3 text-muted-foreground" />
                         <span>
@@ -141,7 +137,6 @@ export function EditorFooter({
 
                     <Separator orientation="vertical" className="h-4" />
 
-                    {/* Zoom Buttons & Slider */}
                     <div className="flex items-center gap-1.5">
                         <Tooltip>
                             <TooltipTrigger asChild>

@@ -57,13 +57,11 @@ export function useCanvasEditor(isEditorOpen = true) {
     const [activeTool, setActiveTool] = useState<ToolType>("crop")
     const [settings, setSettings] = useState<ToolSettings>(DEFAULT_SETTINGS)
 
-    // History stack
     const historyRef = useRef<HistoryItem[]>([])
     const historyIndexRef = useRef<number>(-1)
     const [canUndo, setCanUndo] = useState(false)
     const [canRedo, setCanRedo] = useState(false)
 
-    // Interactive states
     const [isDrawing, setIsDrawing] = useState(false)
     const [isPanning, setIsPanning] = useState(false)
     const startPointRef = useRef<Point | null>(null)
@@ -71,17 +69,13 @@ export function useCanvasEditor(isEditorOpen = true) {
     const brushPointsRef = useRef<Point[]>([])
     const [cursorPos, setCursorPos] = useState<Point | null>(null)
 
-    // Shift / Ctrl modifiers
     const isShiftDownRef = useRef(false)
     const isCtrlDownRef = useRef(false)
 
-    // Crop state
     const [cropRect, setCropRect] = useState<Rect | null>(null)
 
-    // Save dialog state
     const [saveDialogOpen, setSaveDialogOpen] = useState(false)
 
-    // Text tool input state
     const [textInput, setTextInput] = useState<{
         x: number
         y: number
@@ -94,13 +88,11 @@ export function useCanvasEditor(isEditorOpen = true) {
         visible: false,
     })
 
-    // Update history flags
     const updateHistoryFlags = useCallback(() => {
         setCanUndo(historyIndexRef.current > 0)
         setCanRedo(historyIndexRef.current < historyRef.current.length - 1)
     }, [])
 
-    // Push canvas state to history
     const pushHistory = useCallback(() => {
         const canvas = canvasRef.current
         if (!canvas) return
@@ -121,7 +113,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         updateHistoryFlags()
     }, [updateHistoryFlags])
 
-    // Zoom Fit
     const zoomFit = useCallback(() => {
         const container = containerRef.current
         if (!container) return
@@ -137,13 +128,11 @@ export function useCanvasEditor(isEditorOpen = true) {
         setPanOffset({ x: 0, y: 0 })
     }, [width, height])
 
-    // Zoom 100%
     const zoom100 = useCallback(() => {
         setZoom(1)
         setPanOffset({ x: 0, y: 0 })
     }, [])
 
-    // Apply pending canvas initialization
     const applyInitNow = useCallback(() => {
         const initData = pendingInitRef.current
         if (!initData) return
@@ -179,7 +168,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         const previewCtx = preview.getContext("2d")
         previewCtx?.clearRect(0, 0, w, h)
 
-        // Clear and set first history item
         historyRef.current = []
         historyIndexRef.current = -1
         pushHistory()
@@ -190,7 +178,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         }, 50)
     }, [width, height, pushHistory, zoomFit])
 
-    // Synchronize canvas buffer with React DOM updates and prevent clearing on resize
     useLayoutEffect(() => {
         if (!isEditorOpen || !canvasRef.current || !previewCanvasRef.current) {
             return
@@ -238,14 +225,12 @@ export function useCanvasEditor(isEditorOpen = true) {
             return
         }
 
-        // Restore active history state if canvas was cleared by dimension update
         const current = historyRef.current[historyIndexRef.current]
         if (current && current.width === width && current.height === height) {
             ctx.putImageData(current.imageData, 0, 0)
         }
     }, [isEditorOpen, width, height, applyInitNow, updateHistoryFlags, zoomFit])
 
-    // Initialize Canvas
     const initCanvas = useCallback(
         (
             img?: HTMLImageElement | null,
@@ -256,7 +241,6 @@ export function useCanvasEditor(isEditorOpen = true) {
 
             pendingInitRef.current = { img, dims }
 
-            // If editor is already open and dimensions match, execute directly
             setActiveTool("crop")
             if (
                 isEditorOpen &&
@@ -273,7 +257,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         [isEditorOpen, width, height, applyInitNow],
     )
 
-    // Undo action
     const undo = useCallback(() => {
         if (historyIndexRef.current <= 0) return
         historyIndexRef.current -= 1
@@ -292,7 +275,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         updateHistoryFlags()
     }, [width, height, updateHistoryFlags])
 
-    // Redo action
     const redo = useCallback(() => {
         if (historyIndexRef.current >= historyRef.current.length - 1) return
         historyIndexRef.current += 1
@@ -311,7 +293,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         updateHistoryFlags()
     }, [width, height, updateHistoryFlags])
 
-    // Fit canvas on initial load
     useEffect(() => {
         const timer = setTimeout(() => {
             zoomFit()
@@ -319,7 +300,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         return () => clearTimeout(timer)
     }, [width, height, zoomFit])
 
-    // Copy to clipboard
     const handleCopyToClipboard = useCallback(async () => {
         if (!canvasRef.current) return
         const success = await copyCanvasToClipboard(canvasRef.current)
@@ -330,7 +310,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         }
     }, [])
 
-    // Apply Crop
     const applyCrop = useCallback(() => {
         if (!cropRect || !canvasRef.current || !previewCanvasRef.current) return
 
@@ -375,7 +354,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         }
     }, [cropRect, width, height, updateHistoryFlags])
 
-    // Cancel Crop
     const cancelCrop = useCallback(() => {
         setCropRect(null)
         const preview = previewCanvasRef.current
@@ -385,7 +363,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         }
     }, [])
 
-    // Replace the whole canvas with an image (AI tools), keeping undo history
     const replaceWithImage = useCallback(
         (img: HTMLImageElement) => {
             const canvas = canvasRef.current
@@ -424,7 +401,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         [width, height, updateHistoryFlags],
     )
 
-    // Commit Text Annotation
     const commitText = useCallback(() => {
         if (
             !textInput.visible ||
@@ -445,7 +421,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         const textW = metrics.width
         const textH = settings.fontSize
 
-        // Background pill
         ctx.fillStyle = "rgba(0, 0, 0, 0.75)"
         const padX = 8
         const padY = 5
@@ -469,7 +444,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         pushHistory()
     }, [textInput, settings, pushHistory])
 
-    // Sample color with eyedropper
     const sampleColorAtPoint = useCallback((x: number, y: number) => {
         const canvas = canvasRef.current
         if (!canvas) return
@@ -491,7 +465,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         toast.success(`Color sampled: ${hex.toUpperCase()}`)
     }, [])
 
-    // Convert mouse event coordinates to canvas space
     const getCanvasCoordinates = useCallback(
         (e: React.MouseEvent<HTMLCanvasElement>): Point => {
             const canvas = canvasRef.current
@@ -507,7 +480,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         [zoom, width, height],
     )
 
-    // Clear preview canvas
     const clearPreview = useCallback(() => {
         const preview = previewCanvasRef.current
         if (!preview) return
@@ -515,7 +487,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         pctx?.clearRect(0, 0, preview.width, preview.height)
     }, [])
 
-    // Render preview drawing while mouse is down
     const renderPreview = useCallback(
         (start: Point, current: Point) => {
             const preview = previewCanvasRef.current
@@ -604,7 +575,6 @@ export function useCanvasEditor(isEditorOpen = true) {
         [activeTool, settings],
     )
 
-    // Commit drawing to main canvas
     const commitDrawing = useCallback(
         (start: Point, end: Point) => {
             const canvas = canvasRef.current
@@ -684,11 +654,9 @@ export function useCanvasEditor(isEditorOpen = true) {
         [activeTool, settings, pushHistory, clearPreview],
     )
 
-    // Mouse handlers on canvas
     const handleMouseDown = useCallback(
         (e: React.MouseEvent<HTMLCanvasElement>) => {
             if (e.button === 1 || activeTool === "select") {
-                // Middle click or select tool starts panning
                 setIsPanning(true)
                 lastPanPointRef.current = { x: e.clientX, y: e.clientY }
                 return
@@ -783,10 +751,8 @@ export function useCanvasEditor(isEditorOpen = true) {
         [isPanning, isDrawing, getCanvasCoordinates, activeTool, commitDrawing],
     )
 
-    // Keyboard Shortcuts
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
-            // Ignore when typing inside input or textarea
             if (
                 e.target instanceof HTMLInputElement ||
                 e.target instanceof HTMLTextAreaElement

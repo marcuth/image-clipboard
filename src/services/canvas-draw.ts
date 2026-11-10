@@ -1,5 +1,10 @@
 import { Point, Rect, ToolSettings } from "@/types/canvas"
 
+const SNAP_ANGLE_STEP = Math.PI / 4
+const ARROW_HEAD_HALF_ANGLE = Math.PI / 6
+const ARROW_HEAD_MIN_LENGTH = 14
+const ARROW_HEAD_WIDTH_FACTOR = 3
+
 export function drawLine(
     ctx: CanvasRenderingContext2D,
     start: Point,
@@ -20,7 +25,7 @@ export function drawLine(
         const dx = end.x - start.x
         const dy = end.y - start.y
         const angle = Math.atan2(dy, dx)
-        const snap = Math.PI / 4 // 45 deg
+        const snap = SNAP_ANGLE_STEP
         const snappedAngle = Math.round(angle / snap) * snap
         const distance = Math.hypot(dx, dy)
         targetX = start.x + Math.cos(snappedAngle) * distance
@@ -186,32 +191,45 @@ export function drawArrow(
     end: Point,
     settings: ToolSettings,
 ): void {
-    const headLength = Math.max(14, settings.strokeWidth * 3)
+    const distance = Math.hypot(end.x - start.x, end.y - start.y)
+    const headLength = Math.min(
+        distance,
+        Math.max(
+            ARROW_HEAD_MIN_LENGTH,
+            settings.strokeWidth * ARROW_HEAD_WIDTH_FACTOR,
+        ),
+    )
     const angle = Math.atan2(end.y - start.y, end.x - start.x)
+    const headBase = {
+        x:
+            end.x -
+            headLength * Math.cos(angle) * Math.cos(ARROW_HEAD_HALF_ANGLE),
+        y:
+            end.y -
+            headLength * Math.sin(angle) * Math.cos(ARROW_HEAD_HALF_ANGLE),
+    }
 
     ctx.save()
     ctx.strokeStyle = settings.strokeColor
     ctx.fillStyle = settings.strokeColor
     ctx.lineWidth = settings.strokeWidth
-    ctx.lineCap = "round"
-    ctx.lineJoin = "round"
+    ctx.lineCap = "butt"
+    ctx.lineJoin = "miter"
 
-    // Line shaft
     ctx.beginPath()
     ctx.moveTo(start.x, start.y)
-    ctx.lineTo(end.x, end.y)
+    ctx.lineTo(headBase.x, headBase.y)
     ctx.stroke()
 
-    // Arrowhead
     ctx.beginPath()
     ctx.moveTo(end.x, end.y)
     ctx.lineTo(
-        end.x - headLength * Math.cos(angle - Math.PI / 6),
-        end.y - headLength * Math.sin(angle - Math.PI / 6),
+        end.x - headLength * Math.cos(angle - ARROW_HEAD_HALF_ANGLE),
+        end.y - headLength * Math.sin(angle - ARROW_HEAD_HALF_ANGLE),
     )
     ctx.lineTo(
-        end.x - headLength * Math.cos(angle + Math.PI / 6),
-        end.y - headLength * Math.sin(angle + Math.PI / 6),
+        end.x - headLength * Math.cos(angle + ARROW_HEAD_HALF_ANGLE),
+        end.y - headLength * Math.sin(angle + ARROW_HEAD_HALF_ANGLE),
     )
     ctx.closePath()
     ctx.fill()
@@ -233,7 +251,6 @@ export function drawBlurRegion(
 
     ctx.save()
 
-    // Clip to rounded rect if configured
     const radius = settings.blurRounded ? Math.min(12, rw / 4, rh / 4) : 0
     ctx.beginPath()
     if (radius > 0 && typeof ctx.roundRect === "function") {
@@ -243,7 +260,6 @@ export function drawBlurRegion(
     }
     ctx.clip()
 
-    // Downscale and upscale for crisp pixelation/censor effect, or apply blur
     const offscreen = document.createElement("canvas")
     const offCtx = offscreen.getContext("2d")
     if (offCtx) {
@@ -281,7 +297,6 @@ export function drawFocusSpotlight(
     const ch = ctx.canvas.height
     const radius = settings.focusRounded ? Math.min(16, rw / 4, rh / 4) : 0
 
-    // 1. Snapshot the unmodified original image first
     const originalSnapshot = document.createElement("canvas")
     originalSnapshot.width = cw
     originalSnapshot.height = ch
@@ -289,7 +304,6 @@ export function drawFocusSpotlight(
     if (!origCtx) return
     origCtx.drawImage(sourceCanvas, 0, 0)
 
-    // 2. Render the blurred and dimmed overlay on an offscreen canvas
     const overlayCanvas = document.createElement("canvas")
     overlayCanvas.width = cw
     overlayCanvas.height = ch
@@ -305,11 +319,9 @@ export function drawFocusSpotlight(
         overlayCtx.drawImage(originalSnapshot, 0, 0)
     }
 
-    // Apply dark dimming over the entire overlay canvas
     overlayCtx.fillStyle = "rgba(0, 0, 0, 0.55)"
     overlayCtx.fillRect(0, 0, cw, ch)
 
-    // Cut out the spotlight aperture so it is completely transparent
     overlayCtx.save()
     overlayCtx.globalCompositeOperation = "destination-out"
     overlayCtx.beginPath()
@@ -321,16 +333,12 @@ export function drawFocusSpotlight(
     overlayCtx.fill()
     overlayCtx.restore()
 
-    // 3. Composite onto target context (ctx)
     ctx.save()
 
-    // Base: original 100% sharp image
     ctx.drawImage(originalSnapshot, 0, 0)
 
-    // Top: overlay with transparent aperture over the focused rectangle
     ctx.drawImage(overlayCanvas, 0, 0)
 
-    // Draw clean border around the spotlight
     ctx.beginPath()
     if (radius > 0 && typeof ctx.roundRect === "function") {
         ctx.roundRect(rx, ry, rw, rh, radius)

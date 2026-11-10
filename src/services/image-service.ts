@@ -15,7 +15,7 @@ export async function readImageFromClipboard(): Promise<HTMLImageElement | null>
             }
         }
     } catch {
-        // Fallback or permission denied
+        return null
     }
     return null
 }

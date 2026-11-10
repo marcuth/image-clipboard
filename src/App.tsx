@@ -11,7 +11,6 @@ import { toast } from "sonner"
 export function App() {
     const [editorOpen, setEditorOpen] = useState(false)
 
-    // Dark theme state
     const [isDark, setIsDark] = useState(() => {
         const saved = localStorage.getItem("theme")
         return saved ? saved === "dark" : true
@@ -27,7 +26,6 @@ export function App() {
         }
     }, [isDark])
 
-    // Canvas editor hook
     const {
         canvasRef,
         previewCanvasRef,
@@ -65,10 +63,8 @@ export function App() {
         replaceWithImage,
     } = useCanvasEditor(editorOpen)
 
-    // Global Paste Listener (works on both Welcome and Editor)
     useEffect(() => {
         function handleGlobalPaste(e: ClipboardEvent) {
-            // Ignore if typing inside text input
             if (
                 e.target instanceof HTMLInputElement ||
                 e.target instanceof HTMLTextAreaElement
@@ -105,17 +101,14 @@ export function App() {
         return () => window.removeEventListener("paste", handleGlobalPaste)
     }, [initCanvas])
 
-    // Mouse wheel zoom or pan in editor stage
     function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
         if (e.ctrlKey || e.metaKey) {
-            // Zoom
             e.preventDefault()
             const delta = e.deltaY > 0 ? -0.1 : 0.1
             setZoom(
                 Math.max(0.1, Math.min(5, Number((zoom + delta).toFixed(2)))),
             )
         } else {
-            // Pan
             setPanOffset((prev) => ({
                 x: prev.x - e.deltaX,
                 y: prev.y - e.deltaY,

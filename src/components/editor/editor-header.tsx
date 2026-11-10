@@ -106,7 +106,6 @@ export function EditorHeader({
     return (
         <TooltipProvider delayDuration={200}>
             <header className="h-14 border-b border-border bg-card/80 backdrop-blur-md px-3 flex items-center justify-between gap-3 shrink-0 select-none z-30">
-                {/* Brand & Home */}
                 <div className="flex items-center gap-2">
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -142,7 +141,6 @@ export function EditorHeader({
                     </div>
                 </div>
 
-                {/* Central Tools Ribbon */}
                 <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/50">
                     {TOOLS.map((t) => {
                         const Icon = t.icon
@@ -176,9 +174,7 @@ export function EditorHeader({
                     })}
                 </div>
 
-                {/* Contextual Tool Properties & Actions */}
                 <div className="flex items-center gap-2">
-                    {/* Tool specific options */}
                     {showStroke && (
                         <ColorPopover
                             label="Stroke Color"
@@ -211,7 +207,6 @@ export function EditorHeader({
                         />
                     )}
 
-                    {/* Rect rounded toggle */}
                     {activeTool === "rectangle" && (
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-card/60 text-xs">
                             <span className="text-[11px] text-muted-foreground font-medium">
@@ -227,7 +222,6 @@ export function EditorHeader({
                         </div>
                     )}
 
-                    {/* Brush smoothing toggle */}
                     {activeTool === "brush" && (
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-card/60 text-xs">
                             <span className="text-[11px] text-muted-foreground font-medium">
@@ -243,7 +237,6 @@ export function EditorHeader({
                         </div>
                     )}
 
-                    {/* Focus options */}
                     {activeTool === "focus" && (
                         <div className="flex items-center gap-2 px-2 py-1 rounded border border-border bg-card/60 text-xs">
                             <label className="flex items-center gap-1 text-[11px] text-muted-foreground cursor-pointer">
@@ -269,7 +262,6 @@ export function EditorHeader({
                         </div>
                     )}
 
-                    {/* Blur options */}
                     {activeTool === "blur" && (
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-card/60 text-xs">
                             <span className="text-[11px] text-muted-foreground font-medium">
@@ -287,7 +279,6 @@ export function EditorHeader({
 
                     <Separator orientation="vertical" className="h-6 mx-1" />
 
-                    {/* Copy to Clipboard */}
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
@@ -310,14 +301,12 @@ export function EditorHeader({
                         onReplaceImage={onReplaceImage}
                     />
 
-                    {/* Save Dialog */}
                     <SaveDialog
                         canvasRef={canvasRef}
                         open={saveDialogOpen}
                         onOpenChange={setSaveDialogOpen}
                     />
 
-                    {/* Theme Toggle */}
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button

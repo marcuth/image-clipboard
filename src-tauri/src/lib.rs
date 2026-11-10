@@ -24,7 +24,6 @@ async fn upload_to_imgbb(base64_data: String, filename: String, api_key: String)
     blocking(move || uploaders::imgbb::upload(&base64_data, &filename, &api_key)).await
 }
 
-/// Enlarges the image with Bigjpg and returns the result as a data URL.
 #[tauri::command]
 async fn bigjpg_enlarge(
     base64_data: String,

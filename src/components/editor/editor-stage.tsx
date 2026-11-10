@@ -88,7 +88,6 @@ export function EditorStage({
                 backgroundSize: "24px 24px",
             }}
         >
-            {/* Centered Canvas Container with Zoom & Pan */}
             <div
                 className="relative transition-transform duration-75 origin-center shadow-2xl rounded-sm"
                 style={{
@@ -97,7 +96,6 @@ export function EditorStage({
                     height: `${height}px`,
                 }}
             >
-                {/* Checkerboard backdrop for transparent canvas */}
                 <div
                     className="absolute inset-0 pointer-events-none rounded-sm shadow-xl"
                     style={{
@@ -106,7 +104,6 @@ export function EditorStage({
                     }}
                 />
 
-                {/* Persistent Canvas */}
                 <canvas
                     ref={canvasRef}
                     width={width}
@@ -114,7 +111,6 @@ export function EditorStage({
                     className="absolute inset-0 block rounded-sm pointer-events-none"
                 />
 
-                {/* Interactive Drawing & Preview Canvas */}
                 <canvas
                     ref={previewCanvasRef}
                     width={width}
@@ -126,7 +122,6 @@ export function EditorStage({
                     className={`absolute inset-0 block rounded-sm ${getCursorClass()}`}
                 />
 
-                {/* Crop Overlay */}
                 {activeTool === "crop" && (
                     <CropOverlay
                         cropRect={cropRect}
@@ -138,7 +133,6 @@ export function EditorStage({
                     />
                 )}
 
-                {/* Inline Text Tool Input */}
                 {textInput.visible && (
                     <div
                         className="absolute z-30 flex items-center gap-1 bg-background/95 border border-border p-1 rounded-md shadow-2xl backdrop-blur-md"

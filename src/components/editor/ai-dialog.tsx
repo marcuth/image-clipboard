@@ -24,7 +24,6 @@ interface AiDialogProps {
 
 type Busy = "background" | "enlarge" | null
 
-const SCALES: BigjpgOptions["scale"][] = [2, 4, 8, 16]
 const NOISES: { value: BigjpgOptions["noise"]; label: string }[] = [
     { value: -1, label: "None" },
     { value: 0, label: "Low" },
@@ -156,27 +155,10 @@ export function AiDialog({ canvasRef, onReplaceImage }: AiDialogProps) {
                             Enlarge with Bigjpg
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                            Uploads the image to bigjpg.com and may take a few
-                            minutes.
+                            Doubles the image size (2x, the only scale available
+                            without a Bigjpg account). Uploads to bigjpg.com and
+                            may take a few minutes.
                         </p>
-
-                        <div className="space-y-1.5">
-                            <Label className="text-[11px]">Scale</Label>
-                            <div className="flex gap-1.5">
-                                {SCALES.map((s) => (
-                                    <Choice
-                                        key={s}
-                                        value={s}
-                                        current={options.scale}
-                                        onSelect={(scale) =>
-                                            setOptions((o) => ({ ...o, scale }))
-                                        }
-                                    >
-                                        {s}x
-                                    </Choice>
-                                ))}
-                            </div>
-                        </div>
 
                         <div className="space-y-1.5">
                             <Label className="text-[11px]">Style</Label>

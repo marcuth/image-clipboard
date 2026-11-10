@@ -138,7 +138,6 @@ export function WelcomeScreen({
             onDrop={handleDrop}
             className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground transition-colors"
         >
-            {/* Top Bar */}
             <header className="px-6 py-4 flex items-center justify-between border-b border-border/40 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                     <img
@@ -197,7 +196,6 @@ export function WelcomeScreen({
                 </div>
             </header>
 
-            {/* Main Content: 3 Column Start Options */}
             <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 max-w-6xl mx-auto w-full">
                 <div className="text-center mb-8 max-w-xl space-y-2">
                     <Typography.H1 className="text-3xl md:text-4xl font-extrabold tracking-tight font-heading bg-gradient-to-br from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
@@ -210,7 +208,6 @@ export function WelcomeScreen({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                    {/* Column 1: Start From Scratch */}
                     <Card className="flex flex-col border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/50 transition-all shadow-sm">
                         <CardHeader>
                             <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-1">
@@ -260,7 +257,6 @@ export function WelcomeScreen({
                                     </div>
                                 </div>
 
-                                {/* Preset Sizes */}
                                 <div className="space-y-1">
                                     <Label className="text-[11px] text-muted-foreground">
                                         Popular Presets
@@ -291,7 +287,6 @@ export function WelcomeScreen({
                                     </div>
                                 </div>
 
-                                {/* Background Color */}
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-semibold text-muted-foreground">
                                         Background Color
@@ -350,7 +345,6 @@ export function WelcomeScreen({
                         </CardContent>
                     </Card>
 
-                    {/* Column 2: Paste An Image */}
                     <Card className="flex flex-col border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/50 transition-all shadow-sm">
                         <CardHeader>
                             <div className="h-10 w-10 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center mb-1">
@@ -419,7 +413,6 @@ export function WelcomeScreen({
                         </CardContent>
                     </Card>
 
-                    {/* Column 3: Drop An Image */}
                     <Card
                         className={`flex flex-col border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/50 transition-all shadow-sm ${
                             isDragging
@@ -475,7 +468,6 @@ export function WelcomeScreen({
                 </div>
             </main>
 
-            {/* Footer */}
             <footer className="px-6 py-3 border-t border-border/40 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                     <span>Designed & Developed by</span>

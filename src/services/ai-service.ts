@@ -8,7 +8,7 @@ import { invoke } from "@tauri-apps/api/core"
 export type BigjpgStyle = "art" | "photo"
 
 export interface BigjpgOptions {
-    scale: 2 | 4 | 8 | 16
+    scale: 2
     style: BigjpgStyle
     noise: -1 | 0 | 1 | 2 | 3
 }
@@ -25,7 +25,6 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
     })
 }
 
-/** Runs the segmentation model locally (WASM); the model is cached after the first run. */
 export async function removeCanvasBackground(
     canvas: HTMLCanvasElement,
 ): Promise<HTMLImageElement> {
@@ -35,7 +34,6 @@ export async function removeCanvasBackground(
     return loadImageFromBlob(result)
 }
 
-/** Enlarges the canvas with Bigjpg (request is made by the Rust backend). */
 export async function enlargeWithBigjpg(
     canvas: HTMLCanvasElement,
     options: BigjpgOptions,

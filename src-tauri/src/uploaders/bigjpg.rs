@@ -10,6 +10,8 @@ use crate::http::{agent, decode_base64, mime_from_filename, url_encode};
 const BASE_URL: &str = "https://bigjpg.com";
 const POLL_INTERVAL: Duration = Duration::from_secs(3);
 const TIMEOUT: Duration = Duration::from_secs(10 * 60);
+const ALLOWED_SCALES: [u8; 1] = [2];
+const ALLOWED_STYLES: [&str; 2] = ["art", "photo"];
 
 pub struct EnlargeOptions {
     pub scale: u8,
@@ -17,7 +19,6 @@ pub struct EnlargeOptions {
     pub noise: i8,
 }
 
-/// Reads `(width, height)` from PNG, JPEG, GIF and WebP headers.
 pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
     png(data).or_else(|| jpeg(data)).or_else(|| gif(data)).or_else(|| webp(data))
 }
@@ -60,7 +61,6 @@ fn jpeg(d: &[u8]) -> Option<(u32, u32)> {
             continue;
         }
         let marker = d[offset + 1];
-        // SOF0-SOF15, excluding DHT (c4), JPG (c8) and DAC (cc)
         if (0xc0..=0xcf).contains(&marker) && ![0xc4, 0xc8, 0xcc].contains(&marker) {
             return Some((be16(d, offset + 7), be16(d, offset + 5)));
         }
@@ -170,7 +170,6 @@ fn create_task(conf: &Value) -> Result<String, String> {
     result["info"].as_str().map(str::to_string).ok_or_else(|| "Task response missing id".to_string())
 }
 
-/// Returns `Some(url)` when finished, `None` while pending.
 pub fn task_state(result: &Value, id: &str) -> Result<Option<String>, String> {
     let raw = result
         .get(id)
@@ -216,12 +215,11 @@ fn download(url: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("Download failed: {}", e))
 }
 
-/// Uploads the image, enlarges it and returns the resulting image bytes.
 pub fn enlarge(base64_data: &str, filename: &str, opts: &EnlargeOptions) -> Result<Vec<u8>, String> {
-    if ![2, 4, 8, 16].contains(&opts.scale) {
-        return Err("Scale must be 2, 4, 8 or 16".to_string());
+    if !ALLOWED_SCALES.contains(&opts.scale) {
+        return Err("Only 2x enlargement is available without a Bigjpg account".to_string());
     }
-    if !["art", "photo"].contains(&opts.style.as_str()) {
+    if !ALLOWED_STYLES.contains(&opts.style.as_str()) {
         return Err("Style must be \"art\" or \"photo\"".to_string());
     }
     if !(-1..=3).contains(&opts.noise) {
@@ -337,7 +335,7 @@ mod tests {
         let bad = |scale, style: &str, noise| {
             enlarge("aGk=", "a.png", &EnlargeOptions { scale, style: style.into(), noise })
         };
-        assert!(bad(3, "art", 0).unwrap_err().contains("Scale"));
+        assert!(bad(4, "art", 0).unwrap_err().contains("2x"));
         assert!(bad(2, "x", 0).unwrap_err().contains("Style"));
         assert!(bad(2, "art", 9).unwrap_err().contains("Noise"));
         assert!(bad(2, "art", 0).unwrap_err().contains("image size"));
