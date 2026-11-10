@@ -12,8 +12,15 @@ pub fn upload(base64_data: &str, filename: &str, api_key: &str) -> Result<String
         Some(idx) => &base64_data[idx + 1..],
         None => base64_data,
     };
-    let name = filename.trim().trim_end_matches(".png").trim_end_matches(".jpg");
-    let body = format!("image={}&name={}", url_encode(image.trim()), url_encode(name));
+    let name = filename
+        .trim()
+        .trim_end_matches(".png")
+        .trim_end_matches(".jpg");
+    let body = format!(
+        "image={}&name={}",
+        url_encode(image.trim()),
+        url_encode(name)
+    );
 
     let mut response = agent()
         .post(&format!("{}?key={}", ENDPOINT, url_encode(key)))
@@ -30,8 +37,12 @@ pub fn upload(base64_data: &str, filename: &str, api_key: &str) -> Result<String
 }
 
 pub fn parse_response(text: &str) -> Result<String, String> {
-    let json: serde_json::Value =
-        serde_json::from_str(text).map_err(|_| format!("Unexpected response: {}", text.chars().take(200).collect::<String>()))?;
+    let json: serde_json::Value = serde_json::from_str(text).map_err(|_| {
+        format!(
+            "Unexpected response: {}",
+            text.chars().take(200).collect::<String>()
+        )
+    })?;
 
     if let Some(url) = json["data"]["url"].as_str() {
         return Ok(url.to_string());
@@ -47,10 +58,18 @@ mod tests {
 
     #[test]
     fn parses_response() {
-        assert_eq!(parse_response(r#"{"data":{"url":"https://i.ibb.co/x.png"},"success":true}"#).unwrap(), "https://i.ibb.co/x.png");
-        assert_eq!(parse_response(r#"{"error":{"message":"Invalid API v1 key."}}"#).unwrap_err(), "Invalid API v1 key.");
+        assert_eq!(
+            parse_response(r#"{"data":{"url":"https://i.ibb.co/x.png"},"success":true}"#).unwrap(),
+            "https://i.ibb.co/x.png"
+        );
+        assert_eq!(
+            parse_response(r#"{"error":{"message":"Invalid API v1 key."}}"#).unwrap_err(),
+            "Invalid API v1 key."
+        );
         assert_eq!(parse_response("{}").unwrap_err(), "Upload failed");
-        assert!(parse_response("<html>").unwrap_err().starts_with("Unexpected response"));
+        assert!(parse_response("<html>")
+            .unwrap_err()
+            .starts_with("Unexpected response"));
     }
 
     #[test]

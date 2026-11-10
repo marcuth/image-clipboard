@@ -76,7 +76,12 @@ pub fn multipart(
 }
 
 pub fn mime_from_filename(filename: &str) -> &'static str {
-    match filename.rsplit('.').next().map(|e| e.to_lowercase()).as_deref() {
+    match filename
+        .rsplit('.')
+        .next()
+        .map(|e| e.to_lowercase())
+        .as_deref()
+    {
         Some("jpg") | Some("jpeg") => "image/jpeg",
         Some("webp") => "image/webp",
         Some("gif") => "image/gif",
@@ -103,7 +108,13 @@ mod tests {
 
     #[test]
     fn builds_multipart_body() {
-        let (ct, body) = multipart(&[("reqtype", "fileupload")], "fileToUpload", "a\"b.png", "image/png", b"DATA");
+        let (ct, body) = multipart(
+            &[("reqtype", "fileupload")],
+            "fileToUpload",
+            "a\"b.png",
+            "image/png",
+            b"DATA",
+        );
         assert!(ct.starts_with("multipart/form-data; boundary="));
         let text = String::from_utf8(body).unwrap();
         assert!(text.contains("name=\"reqtype\"\r\n\r\nfileupload"));

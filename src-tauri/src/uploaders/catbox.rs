@@ -4,7 +4,11 @@ const ENDPOINT: &str = "https://catbox.moe/user/api.php";
 
 pub fn upload(base64_data: &str, filename: &str) -> Result<String, String> {
     let bytes = decode_base64(base64_data)?;
-    let name = if filename.trim().is_empty() { "screenshot.png" } else { filename.trim() };
+    let name = if filename.trim().is_empty() {
+        "screenshot.png"
+    } else {
+        filename.trim()
+    };
     let (content_type, body) = multipart(
         &[("reqtype", "fileupload")],
         "fileToUpload",
@@ -35,7 +39,11 @@ pub fn parse_response(status: u16, text: &str) -> Result<String, String> {
     } else if trimmed.is_empty() {
         Err(format!("Catbox responded with status {}", status))
     } else {
-        Err(format!("Catbox responded with status {}: {}", status, trimmed.chars().take(200).collect::<String>()))
+        Err(format!(
+            "Catbox responded with status {}: {}",
+            status,
+            trimmed.chars().take(200).collect::<String>()
+        ))
     }
 }
 
@@ -45,9 +53,14 @@ mod tests {
 
     #[test]
     fn parses_success_and_errors() {
-        assert_eq!(parse_response(200, " https://files.catbox.moe/a.png\n").unwrap(), "https://files.catbox.moe/a.png");
+        assert_eq!(
+            parse_response(200, " https://files.catbox.moe/a.png\n").unwrap(),
+            "https://files.catbox.moe/a.png"
+        );
         assert!(parse_response(412, "").unwrap_err().contains("412"));
-        assert!(parse_response(200, "No fileToUpload").unwrap_err().contains("No fileToUpload"));
+        assert!(parse_response(200, "No fileToUpload")
+            .unwrap_err()
+            .contains("No fileToUpload"));
     }
 
     #[test]
